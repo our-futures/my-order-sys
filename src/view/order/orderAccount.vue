@@ -19,6 +19,7 @@
       <el-row>
         <el-button class="filter-item" type="primary" v-waves icon="edit" @click="handleSendAll" size="small">批量发货</el-button>
         <el-button class="filter-item" type="primary" v-waves icon="edit" @click="handleDelAll" size="small">批量删除</el-button>
+        <el-button class="filter-item" type="primary" v-waves icon="edit" @click="addOrder" size="small">添加订单</el-button>
       </el-row>
     </div>
     <!-- 表格 -->
@@ -88,6 +89,41 @@
         :page-sizes="[10,20,30, 50]" :page-size="listQuery.pageSize" layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
     </div>
+    <!-- 编辑功能 -->
+     <el-dialog title="填写订单信息" :visible.sync="dialogFormVisible">
+                <el-form :model="editForm">
+                  <el-form-item label="订单编号" :label-width="formLabelWidth">
+                    <el-input v-model="editForm.orderId" auto-complete="off"></el-input>
+                  </el-form-item>
+                  <el-form-item label="宝贝" :label-width="formLabelWidth">
+                    <el-input v-model="editForm.goods" auto-complete="off"></el-input>
+                  </el-form-item>
+                  <el-form-item label="单价" :label-width="formLabelWidth">
+                    <el-input v-model="editForm.money" auto-complete="off"></el-input>
+                  </el-form-item>
+                  <el-form-item label="买家" :label-width="formLabelWidth">
+                    <el-input v-model="editForm.realName" auto-complete="off"></el-input>
+                  </el-form-item>
+                  <el-form-item label="预定日期" :label-width="formLabelWidth">
+                    <el-date-picker v-model="editForm.orderDay" type="date" placeholder="选择日期"  @change="dateChange" :picker-options="pickerOptions0">
+                    </el-date-picker>
+                  </el-form-item>
+                  <el-form-item label="预定数量" :label-width="formLabelWidth">
+                    <el-input v-model="editForm.orderNum" auto-complete="off"></el-input>
+                  </el-form-item>
+                  <el-form-item label="实收款" :label-width="formLabelWidth">
+                    <el-input v-model="editForm.collectionMoney" auto-complete="off"></el-input>
+                  </el-form-item>
+                  <el-form-item label="订单状态" :label-width="formLabelWidth">
+                    <!-- <el-input v-model="form.date" auto-complete="off"></el-input> -->
+                    <el-input v-model="editForm.orderStatus" auto-complete="off"></el-input>
+                  </el-form-item>
+                </el-form>
+          <div slot="footer" class="dialog-footer">
+             <el-button @click="dialogFormVisible = false">取 消</el-button>
+             <el-button type="primary" @click="handledoneEdit">确 定</el-button>
+        </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -99,7 +135,8 @@
       return {
         list: null,//表格list
         total: null,
-        listLoading: false,
+        dialogFormVisible:false,
+        listLoading:false,
         showAdvancedSearchPopover: false,
         isIndeterminateStatus: false,
         checkAllStatus: true,
@@ -115,7 +152,23 @@
         },
         orderStatus: [{label: '待付款', value: 1}, {label: '待发货', value: 2}, {label: '已发货', value: 3}, {label: '已取消', value: 4}, {label: '已完成', value: 5}],
         dialogFormVisible: false,
-        multipleSelection: []  //批量发货
+        multipleSelection: [],  //批量发货
+        editForm: {
+              orderId:'',
+              goods: '',
+              realName:'',
+              phone:'',
+              orderNum:'',
+              money:'',
+              collectionMoney:'',
+              orderStatus: ''
+            },
+            formLabelWidth: '140px' ,
+            pickerOptions0: {
+              disabledDate(time) {
+                return time.getTime() < Date.now() - 8.64e7;
+              }
+            }
       }
     },
     filters: {
@@ -136,6 +189,43 @@
       vm.getList();
     },
     methods: {
+      initForm() {
+        this.editForm = {
+              orderId:'',
+              goods: '',
+              realName:'',
+              phone:'',
+              orderNum:'',
+              money:'',
+              collectionMoney:'',
+              orderStatus: ''
+            }
+      },
+      //转换时间格式方法
+      dateChange(val) {
+        this.editForm.dorderDayate=val;
+      },
+      addOrder() {
+        //每次新增时，重置新增表单数据，避免双向绑定影响
+          this.initForm();
+          var vm = this;
+          vm.list.push(vm.editForm);
+          this.dialogFormVisible = true;
+      },
+      //编辑中的提交
+      handledoneEdit(){
+         // console.log(this.editIndex);
+         // console.log(this.editForm);
+         // var vm = this ;
+         // vm.tableData3[this.editIndex] = this.editForm;
+         this.dialogFormVisible = false ;//设置false为不可见
+         // 提交后弹出成功提示语
+        this.$message({
+          showClose: true,
+          message: '提交成功！',
+          type: 'success'
+        });
+      },
       initData (data) {
         var vm = this;
         vm.list = data;
